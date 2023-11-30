@@ -1,8 +1,9 @@
 import React, {useState} from "react";
 
 export const ConvertComponent = (props) => {
-  const [inputConvertValue, setInputConvertValue] = useState(0);
-  const [inputResultValue, setInputResultValue] = useState(0);
+  const regexp = new RegExp('[A-Za-zА-Яа-я\\W\_]','g');
+  const [inputConvertValue, setInputConvertValue] = useState();
+  const [inputResultValue, setInputResultValue] = useState();
   const [checkedConvertingCurrency, setConvertingCurrency] = useState('usd');
   const [checkedResultCurrency, setResultCurrency] = useState('usd');
 
@@ -34,6 +35,7 @@ export const ConvertComponent = (props) => {
   }
 
   const getInputConvertingValue = (event) => {
+    event.target.value = event.target.value.replace(regexp, '');
     setInputConvertValue(event.target.value);
     calcConvertResult(event.target.value, checkedConvertingCurrency, checkedResultCurrency)
   }
@@ -65,6 +67,7 @@ export const ConvertComponent = (props) => {
   }
 
   const getInputResultValue = (event) => {
+    event.target.value = event.target.value.replace(regexp, '');
     setInputResultValue(event.target.value)
     calcBack(event.target.value)
   }
