@@ -1,87 +1,72 @@
-import React, {useState} from "react";
+import React from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {CONSTANTS} from "../js/CONSTANTS.js";
+import {getCurrencyForConvertAction, getCurrencyResultAction, getValueForChangeAction, getResultAction} from "../actions";
 
-export const ConvertComponent = (props) => {
-  const regexp = new RegExp('[A-Za-zА-Яа-я\\W\_]','g');
-  const [inputConvertValue, setInputConvertValue] = useState();
-  const [inputResultValue, setInputResultValue] = useState();
-  const [checkedConvertingCurrency, setConvertingCurrency] = useState('usd');
-  const [checkedResultCurrency, setResultCurrency] = useState('usd');
+export const ConvertComponent = () => {
+  const dispatch = useDispatch();
 
+  const inputConvertValue = useSelector(store => store.valueForChangeReducer.value);
+  const inputResultValue = useSelector(store => store.valueResultReducer.value);
+  const checkedCurrencyForConvert = useSelector(store => store.currencyForConvertReducer.checked);
+  const checkedCurrencyResult = useSelector(store => store.currencyResultReducer.checked);
+  const currencyReducerArray = (useSelector(store => store.getCurrencyReducer));
+  let checkedEvent;
 
-  const calcResultForOtherPairs = (value, currencyConvert, currencyResult) => {
-    if (currencyResult === "uah") {
-      setInputResultValue(value * props[currencyConvert])
-    } else {
-      setInputResultValue((value * props[currencyConvert]) / props[currencyResult]);
-    }
-  }
-
-  const calcConvertResult = (value, currencyConvert, currencyResult) => {
-    if (currencyConvert === currencyResult) {
-      setInputResultValue(value)
-    } else {
-      switch (currencyConvert) {
-        case "usd":
-          calcResultForOtherPairs(value, currencyConvert, currencyResult)
-          break;
-        case "eur":
-          calcResultForOtherPairs(value, currencyConvert, currencyResult)
-          break;
-        case "uah":
-          setInputResultValue(value / props[currencyResult])
-          break;
-      }
-    }
-  }
 
   const getInputConvertingValue = (event) => {
-    event.target.value = event.target.value.replace(regexp, '');
-    setInputConvertValue(event.target.value);
-    calcConvertResult(event.target.value, checkedConvertingCurrency, checkedResultCurrency)
-  }
+    checkedEvent = event.target.value.replace(CONSTANTS.REGEXP, '');
 
-  const calcBack = (value) => {
-    if (checkedConvertingCurrency===checkedResultCurrency) {
-      setInputConvertValue(value)
-    } else {
-      switch (checkedConvertingCurrency) {
-        case "usd":
-          if (checkedResultCurrency==="uah") {
-            setInputConvertValue(value / props[checkedConvertingCurrency])
-          } else {
-            setInputConvertValue((value * props[checkedConvertingCurrency]) / props[checkedResultCurrency]);
-          }
-          break;
-        case "eur":
-          if (checkedResultCurrency==="uah") {
-            setInputConvertValue(value / props[checkedConvertingCurrency])
-          } else {
-            setInputConvertValue((value * props[checkedResultCurrency]) / props[checkedConvertingCurrency]);
-          }
-          break;
-        case "uah":
-          setInputConvertValue(value * props[checkedResultCurrency])
-          break;
-      }
-    }
+    dispatch(getValueForChangeAction(checkedEvent));
+
+    checkSimilarCurrency(getResultAction, checkedEvent);
+    exchangeData(getResultAction, checkedCurrencyResult, checkedEvent);
   }
 
   const getInputResultValue = (event) => {
-    event.target.value = event.target.value.replace(regexp, '');
-    setInputResultValue(event.target.value)
-    calcBack(event.target.value)
+    checkedEvent = event.target.value.replace(CONSTANTS.REGEXP, '');
+
+    dispatch(getResultAction(checkedEvent));
+
+    checkSimilarCurrency(getValueForChangeAction, checkedEvent);
+    convertExchangeData(checkedEvent);
   }
 
   const getSelectedConvertingCurrency = (event) => {
-    setConvertingCurrency(event.target.value)
-    calcConvertResult(inputConvertValue, event.target.value, checkedResultCurrency)
+    dispatch(getCurrencyForConvertAction(event.target.value));
+
+    exchangeCheckedCurrency(event.target.value);
   }
 
   const getSelectedResultCurrency = (event) => {
-    setResultCurrency(event.target.value)
-    calcConvertResult(inputConvertValue, checkedConvertingCurrency, event.target.value)
+    dispatch(getCurrencyResultAction(event.target.value));
+
+    exchangeData(getResultAction, event.target.value, inputConvertValue);
   }
 
+  const checkSimilarCurrency = (action, value) => {
+    if (checkedCurrencyForConvert === checkedCurrencyResult) {
+      dispatch(action(value));
+    }
+  }
+
+  const exchangeData = (action, value, inputValue) => {
+    value === 'UAH'
+      ? dispatch(getResultAction(currencyReducerArray[checkedCurrencyForConvert] * inputValue))
+      : dispatch(getResultAction((currencyReducerArray[checkedCurrencyForConvert] * inputValue) / currencyReducerArray[value]));
+  }
+
+  const exchangeCheckedCurrency = (value) => {
+    checkedCurrencyResult === 'UAH'
+      ? dispatch(getResultAction(currencyReducerArray[value] * inputConvertValue))
+      : dispatch(getResultAction((currencyReducerArray[value] * inputConvertValue) / currencyReducerArray[checkedCurrencyResult]));
+  }
+
+  const convertExchangeData = (value) => {
+    checkedCurrencyResult === 'UAH'
+      ? dispatch(getValueForChangeAction(value / currencyReducerArray[checkedCurrencyForConvert]))
+      : dispatch(getValueForChangeAction((value * currencyReducerArray[checkedCurrencyResult]) / currencyReducerArray[checkedCurrencyForConvert]));
+  }
 
   return (
     <>
@@ -90,24 +75,39 @@ export const ConvertComponent = (props) => {
           <label htmlFor="converting-currency">
             У меня есть:
           </label>
-          <input type="text" name="converting currency" onChange={(event) => getInputConvertingValue(event)} id="converting-currency" value={inputConvertValue}/>
-          <select className="main__select" name="currency list" id="currency-for-convert" onChange={(event) => getSelectedConvertingCurrency(event)}>
-            <option value="usd" selected>USD</option>
-            <option value="eur">EUR</option>
-            <option value="uah">UAH</option>
+          <input type="text" name="converting currency"
+                 value={inputConvertValue} id="converting-currency"
+                 onChange={(event) => getInputConvertingValue(event)}
+                 onFocus={(event) => event.target.value === '0' ? event.target.value = '' : event.target.value }
+          />
+          <select className="main__select" name="currency list" id="currency-for-convert"
+                  onChange={(event) => getSelectedConvertingCurrency(event)}>
+            {Object.keys(useSelector(store => store.getCurrencyReducer)).map((currency) => <option value={currency} >{currency}</option>)}
           </select>
+          {
+            checkedCurrencyForConvert
+            ? <p className="main__message-block">1 {checkedCurrencyForConvert} = {currencyReducerArray[checkedCurrencyForConvert]} UAH</p>
+            : false
+          }
         </div>
 
         <div className="main__convert-block">
           <label htmlFor="converting-result-currency">
             Я получу:
           </label>
-          <input type="text" name="converting currency result" onChange={(event) => getInputResultValue(event)} value={inputResultValue} id="converting-result-currency"/>
+          <input type="text" name="converting currency result"
+                 value={inputResultValue} id="converting-result-currency"
+                 onChange={(event) => getInputResultValue(event)}
+                 onFocus={(event) => event.target.value === '0' ? event.target.value = '' : event.target.value }
+          />
           <select className="main__select" name="currency list" id="currency-convert-result" onChange={(event) => getSelectedResultCurrency(event)}>
-            <option value="usd" selected>USD</option>
-            <option value="eur" >EUR</option>
-            <option value="uah">UAH</option>
+            {Object.keys(useSelector(store => store.getCurrencyReducer)).map((currency) => <option value={currency} >{currency}</option>)}
           </select>
+          {
+            checkedCurrencyForConvert
+              ? <p className="main__message-block">1 UAH = {1 / currencyReducerArray[checkedCurrencyForConvert]} {checkedCurrencyForConvert}</p>
+              : false
+          }
         </div>
       </form>
     </>

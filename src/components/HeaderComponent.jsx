@@ -1,36 +1,27 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {CONSTANTS} from '../js/CONSTANTS.js';
 import { ConvertComponent } from './ConvertComponent.jsx';
+import {getCurrencyAction} from '../actions';
+import {useAPI} from "../js/useAPI";
 
-export const HeaderComponent = (props) => {
-  const [res, setRes] = useState([]);
-  const [usd, setUSD] = useState('');
-  const [eur, setEUR] = useState('');
-
-  useEffect(() => {
-    fetch("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json")
-      .then(res => res.json())
-      .then(
-        (result) => {
-          setRes(result.filter((item) => item.cc === 'EUR' || item.cc === 'USD'))
-        },
-        (error) => {
-          throw error;
-        })
-  },[])
+export const HeaderComponent = () => {
+  const dispatch = useDispatch();
+  const currencyArray = useAPI(CONSTANTS.API);
 
   useEffect(() => {
-    res.forEach(e => e.cc === 'USD'
-      ? setUSD(e.rate.toFixed(1))
-      : setEUR(e.rate.toFixed(1)))
-  },[res])
+    currencyArray.forEach((element) => {
+      dispatch(getCurrencyAction(element));
+    });
+  }, [currencyArray]);
 
   return (
     <>
       <div className={"header__container"}>
-        {usd ? <p className="header__text">1 USD = {usd} UAH</p> : 0}
-        {eur ? <p className="header__text">1 EUR = {eur} UAH</p> : 0}
+        {<p className="header__text">1 USD = {useSelector(store => store.getCurrencyReducer.USD)} UAH</p>}
+        {<p className="header__text">1 EUR = {useSelector(store => store.getCurrencyReducer.EUR)} UAH</p>}
       </div>
-      <ConvertComponent usd={usd} eur={eur}/>
+      <ConvertComponent />
     </>
   )
 }
