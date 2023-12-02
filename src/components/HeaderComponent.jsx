@@ -14,7 +14,7 @@ export const HeaderComponent = () => {
       dispatch(getCurrencyAction(element));
     });
   }, [currencyArray]);
-console.log(useSelector(store => store.getCurrencyReducer))
+
   return (
     <>
       <div className={"header__container"}>
