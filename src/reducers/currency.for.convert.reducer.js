@@ -1,5 +1,5 @@
 const defaultCur = {
-  checked: 'USD'
+  checked: 'USD - Долар США'
 }
 
 export const currencyForConvertReducer = (state = defaultCur, action) => {

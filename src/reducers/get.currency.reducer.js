@@ -1,7 +1,7 @@
 const defaultState = {
-  USD: 0,
-  EUR: 0,
-  UAH: 1,
+  'USD - Долар США': 0,
+  'EUR - Євро': 0,
+  'UAH - Українська гривня': 1,
 
 }
 

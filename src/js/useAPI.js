@@ -10,7 +10,7 @@ export const useAPI = (url) => {
         const response = await fetch(url);
         const json = await response.json();
         const curArray = json.map((item) => {
-          return {[item.cc]: item.rate};
+          return {[`${item.cc} - ${item.txt}`]: item.rate};
         });
         setResponse(curArray);
       }

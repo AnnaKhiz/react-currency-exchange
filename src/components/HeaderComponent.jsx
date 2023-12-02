@@ -14,12 +14,12 @@ export const HeaderComponent = () => {
       dispatch(getCurrencyAction(element));
     });
   }, [currencyArray]);
-
+console.log(useSelector(store => store.getCurrencyReducer))
   return (
     <>
       <div className={"header__container"}>
-        {<p className="header__text">1 USD = {useSelector(store => store.getCurrencyReducer.USD)} UAH</p>}
-        {<p className="header__text">1 EUR = {useSelector(store => store.getCurrencyReducer.EUR)} UAH</p>}
+        {<p className="header__text">1 USD = {useSelector(store => store.getCurrencyReducer['USD - Долар США'])} UAH</p>}
+        {<p className="header__text">1 EUR = {useSelector(store => store.getCurrencyReducer['EUR - Євро'])} UAH</p>}
       </div>
       <ConvertComponent />
     </>

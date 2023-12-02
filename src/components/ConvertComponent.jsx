@@ -15,7 +15,7 @@ export const ConvertComponent = () => {
 
 
   const getInputConvertingValue = (event) => {
-    checkedEvent = event.target.value.replace(CONSTANTS.REGEXP, '');
+    checkIncorrectValue(event);
 
     dispatch(getValueForChangeAction(checkedEvent));
 
@@ -24,7 +24,7 @@ export const ConvertComponent = () => {
   }
 
   const getInputResultValue = (event) => {
-    checkedEvent = event.target.value.replace(CONSTANTS.REGEXP, '');
+    checkIncorrectValue(event);
 
     dispatch(getResultAction(checkedEvent));
 
@@ -42,6 +42,11 @@ export const ConvertComponent = () => {
     dispatch(getCurrencyResultAction(event.target.value));
 
     exchangeData(getResultAction, event.target.value, inputConvertValue);
+  }
+
+  const checkIncorrectValue = (event) => {
+    checkedEvent = event.target.value.replace(CONSTANTS.REGEXP, '');
+    checkedEvent === '.' ? checkedEvent = '' : checkedEvent;
   }
 
   const checkSimilarCurrency = (action, value) => {
@@ -73,7 +78,7 @@ export const ConvertComponent = () => {
       <form className={"main__exchange-form"}>
         <div className="main__convert-block">
           <label htmlFor="converting-currency">
-            У меня есть:
+            Я маю:
           </label>
           <input type="text" name="converting currency"
                  value={inputConvertValue} id="converting-currency"
@@ -93,7 +98,7 @@ export const ConvertComponent = () => {
 
         <div className="main__convert-block">
           <label htmlFor="converting-result-currency">
-            Я получу:
+            Я отримаю:
           </label>
           <input type="text" name="converting currency result"
                  value={inputResultValue} id="converting-result-currency"
