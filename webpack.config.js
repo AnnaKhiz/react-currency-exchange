@@ -25,14 +25,9 @@ module.exports = {
                 }
             },
             {
-                test: /\.(jpg|png|gif|woff|eot|ttf|svg)/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 50000
-                    }
-                }
-            }
+                test: /\.(jpg|png|svg|gif)$/,
+                type: 'asset/resource',
+            },
         ],
     },
     plugins: [
